@@ -103,7 +103,7 @@ public  class walletServices implements walletRepo2 {
 
 
     @Override
-    public ResponseEntity<UserDTO> transferMoney(String username, Long userId2, Users u) {
+    public ResponseEntity<?> transferMoney(String username, Long userId2, Users u) {
 
         try {
             Optional<Users> user1Data = Optional.ofNullable(wallet.findByUsername(username));
@@ -113,21 +113,29 @@ public  class walletServices implements walletRepo2 {
                 Users currentUsers1Data = user1Data.get();
                 Users currentUsers2Data = user2Data.get();
                 double currentBalance1 = currentUsers1Data.getBalance();
-                if (currentBalance1 >= u.getBalance()) {
-                    double currentBalance2 = currentUsers2Data.getBalance();
-                    currentUsers1Data.setBalance(currentBalance1 - u.getBalance());
-                    currentUsers2Data.setBalance(currentBalance2 + u.getBalance());
-                    Users updatedUsers1Data = wallet.save(currentUsers1Data);
-                    UserDTO dto = new UserDTO(updatedUsers1Data);
+                if (u.getBalance() <= moneyConfig.getMaxTransferAmount()) {
+                    // Check if the current balance is sufficient
+                    if (currentBalance1 >= u.getBalance()) {
+                        double currentBalance2 = currentUsers2Data.getBalance();
+                        currentUsers1Data.setBalance(currentBalance1 - u.getBalance());
+                        currentUsers2Data.setBalance(currentBalance2 + u.getBalance());
+                        Users updatedUsers1Data = wallet.save(currentUsers1Data);
+                        UserDTO dto = new UserDTO(updatedUsers1Data);
 
-//                    Users updatedUsers2Data = wallet.save(currentUsers2Data);
-//                    List<Users> updatedUsers = Arrays.asList(updatedUsers1Data, updatedUsers2Data);
+                        return new ResponseEntity<>(dto, HttpStatus.CREATED);
+                    } else {
 
-                    return new ResponseEntity<>(dto, HttpStatus.CREATED);
+                        ErrorResponse insufficientBalanceError = new ErrorResponse("Insufficient balance for transfer");
+                        return new ResponseEntity<>(insufficientBalanceError, HttpStatus.BAD_REQUEST);
+                    }
+                } else {
+
+                    ErrorResponse maxTransferAmountError = new ErrorResponse("Exceeded maximum transfer amount");
+                    return new ResponseEntity<>(maxTransferAmountError, HttpStatus.BAD_REQUEST);
                 }
-
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
+
+
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

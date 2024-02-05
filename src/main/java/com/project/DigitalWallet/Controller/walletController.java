@@ -64,7 +64,7 @@ public ResponseEntity<?> addMoney(@RequestBody Users u) {
 
 
     @PostMapping(value ="/transferMoney", consumes={"application/json"})
-    public ResponseEntity<UserDTO> transferMoney(@RequestBody Users u) {
+    public ResponseEntity<?> transferMoney(@RequestBody Users u) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication != null && authentication.isAuthenticated()) {

@@ -14,7 +14,7 @@ public interface walletRepo2 {
     void saveTransaction(Long userId,String type,double amount,String formattedTimeStamp);
 //     ResponseEntity<Users> addMoney(Long userId, Users u);
 ResponseEntity<?> addMoney(String username, Users u);
-    ResponseEntity<UserDTO> transferMoney(String username, Long userId2, Users u);
+    ResponseEntity<?> transferMoney(String username, Long userId2, Users u);
      ResponseEntity<String> checkBalance(Long userId);
      ResponseEntity<List<Transaction>> getHistory(Long userId);
      String removeUser(Long userId);
