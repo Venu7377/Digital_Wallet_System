@@ -9,11 +9,11 @@ import lombok.Data;
 @Table(name = "transactions")
 
 public class Transaction {
-    @ManyToOne
-
-    @JoinColumn(name = "userId")
-
-    private Users us;
+//    @ManyToOne
+//
+//    @JoinColumn(name = "userId")
+//
+//    private Users us;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

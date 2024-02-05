@@ -39,22 +39,22 @@ public class walletController {
 
 
 @PostMapping ("/loadMoney")
-public ResponseEntity<DTO2> addMoney(@RequestBody Users u) {
+public ResponseEntity<?> addMoney(@RequestBody Users u) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-    if (authentication != null && authentication.isAuthenticated()) {
+//    if (authentication != null && authentication.isAuthenticated()) {
 
         String username = authentication.getName();
-        if(username.equals(u.getUsername())){
+//        if(username.equals(u.getUsername())){
             Long userId=wallet.findByUsername(u.getUsername()).getUserId();
             w.saveTransaction(userId,"Loaded",u.getBalance(),w.getDateTime());
             return w.addMoney(username,u);
-        }
+//        }
 
-    }
+//    }
 
-        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+//        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 
 //        w.sendTransactionNotification("venugundam7378@gmail.com","Money Added Successfully","Rs"+u.getBalance()+" is added to your wallet  Successfully!! \n" +w.getDateTime());
 

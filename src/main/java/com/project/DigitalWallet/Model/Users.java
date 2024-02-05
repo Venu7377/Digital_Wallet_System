@@ -12,8 +12,8 @@ import java.util.List;
 @Component
 //@Builder
 public class Users {
-    @OneToMany(mappedBy = "us", cascade = CascadeType.ALL)
-    private List<Transaction> transactions;
+//    @OneToMany(mappedBy = "us", cascade = CascadeType.ALL)
+//    private List<Transaction> transactions;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

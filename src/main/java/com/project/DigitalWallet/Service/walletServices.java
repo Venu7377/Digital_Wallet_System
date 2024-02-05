@@ -1,7 +1,9 @@
 package com.project.DigitalWallet.Service;
 
+import com.project.DigitalWallet.Config.MoneyConfig;
 import com.project.DigitalWallet.DTO.DTO2;
 import com.project.DigitalWallet.DTO.UserDTO;
+import com.project.DigitalWallet.ErrorResponse;
 import com.project.DigitalWallet.Model.Transaction;
 import com.project.DigitalWallet.Model.Users;
 import com.project.DigitalWallet.repo.transactionRepository;
@@ -28,6 +30,8 @@ public  class walletServices implements walletRepo2 {
     walletRepository wallet;
     @Autowired
     transactionRepository t_rep;
+    @Autowired
+    private MoneyConfig moneyConfig;
 
 
     @Override
@@ -65,25 +69,33 @@ public  class walletServices implements walletRepo2 {
     }
 
     @Override
-    public ResponseEntity<DTO2> addMoney(String username, Users u) {
+    public ResponseEntity<?> addMoney(String username, Users u) {
 
         try {
             Optional<Users> userdata = Optional.ofNullable(wallet.findByUsername(username));
             if (userdata.isPresent()) {
+                if (u.getBalance() >= moneyConfig.getMinLoadAmount() && u.getBalance() <= moneyConfig.getMaxLoadAmount()) {
+                    Users currentUsersData = userdata.get();
+                    double currentBalance = currentUsersData.getBalance();
 
-                Users currentUsersData = userdata.get();
-                double currentBalance = currentUsersData.getBalance();
+                    currentUsersData.setBalance(currentBalance + u.getBalance());
 
-                currentUsersData.setBalance(currentBalance + u.getBalance());
-
-                Users updatedUsersData = wallet.save(currentUsersData);
-                DTO2 dto2 = new DTO2(updatedUsersData);
+                    Users updatedUsersData = wallet.save(currentUsersData);
+                    DTO2 dto2 = new DTO2(updatedUsersData);
 
 
-                return new ResponseEntity<>(dto2, HttpStatus.CREATED);
+                    return new ResponseEntity<>(dto2, HttpStatus.CREATED);
+                }
+                else {
+
+                    String errorMessage = "Amount to be loaded should be between "
+                            + moneyConfig.getMinLoadAmount() + " and " + moneyConfig.getMaxLoadAmount();
+                    return new ResponseEntity<>(new ErrorResponse(errorMessage), HttpStatus.BAD_REQUEST);
+                }
             }
 
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new ErrorResponse("User not found with the given username"), HttpStatus.NOT_FOUND);
+
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -146,11 +158,11 @@ public  class walletServices implements walletRepo2 {
     public String removeUser(Long userId){
         Optional<Users> user = wallet.findById(userId);
         if (user.isPresent()) {
-            Users removedUser = user.get();
-            List<Transaction> userTransactions = removedUser.getTransactions();
-            if (userTransactions != null) {
-                t_rep.deleteAll(userTransactions);
-            }
+//            Users removedUser = user.get();
+//            List<Transaction> userTransactions = removedUser.getTransactions();
+//            if (userTransactions != null) {
+//                t_rep.deleteAll(userTransactions);
+//            }
             wallet.deleteById(userId);
 
             return "Wallet of user with Users Id: "+userId+" is Deleted";
