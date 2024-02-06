@@ -12,14 +12,12 @@ public interface walletRepo2 {
     ResponseEntity<UserDTO> createWallet(Users u);
     String getDateTime();
     void saveTransaction(Long userId,String type,double amount,String formattedTimeStamp);
-//     ResponseEntity<Users> addMoney(Long userId, Users u);
-ResponseEntity<?> addMoney(String username, Users u);
-    ResponseEntity<?> transferMoney(String username, Long userId2, Users u);
-     ResponseEntity<String> checkBalance(Long userId);
-     ResponseEntity<List<Transaction>> getHistory(Long userId);
-     String removeUser(Long userId);
 
+ResponseEntity<?> addMoney(Long userId,double amount);
+    ResponseEntity<?> transferMoney(Long userId1, Long userId2, double amount);
+     ResponseEntity<?> checkBalance(Long userId);
+     ResponseEntity<?> getHistory(Long userId);
+     ResponseEntity<?> removeUser(Long userId);
 
-
-    List<Transaction> filterTransactions(Long userId, String transactionType);
+    ResponseEntity<?> filterTransactions(Long userId, String transactionType);
 }

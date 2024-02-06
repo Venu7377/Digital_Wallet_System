@@ -69,16 +69,16 @@ public  class walletServices implements walletRepo2 {
     }
 
     @Override
-    public ResponseEntity<?> addMoney(String username, Users u) {
+    public ResponseEntity<?> addMoney(Long userId,double amount) {
 
         try {
-            Optional<Users> userdata = Optional.ofNullable(wallet.findByUsername(username));
+            Optional<Users> userdata = wallet.findById(userId);
             if (userdata.isPresent()) {
-                if (u.getBalance() >= moneyConfig.getMinLoadAmount() && u.getBalance() <= moneyConfig.getMaxLoadAmount()) {
+                if (amount >= moneyConfig.getMinLoadAmount() && amount <= moneyConfig.getMaxLoadAmount()) {
                     Users currentUsersData = userdata.get();
                     double currentBalance = currentUsersData.getBalance();
 
-                    currentUsersData.setBalance(currentBalance + u.getBalance());
+                    currentUsersData.setBalance(currentBalance + amount);
 
                     Users updatedUsersData = wallet.save(currentUsersData);
                     DTO2 dto2 = new DTO2(updatedUsersData);
@@ -103,39 +103,32 @@ public  class walletServices implements walletRepo2 {
 
 
     @Override
-    public ResponseEntity<?> transferMoney(String username, Long userId2, Users u) {
+    public ResponseEntity<?> transferMoney(Long userId1, Long userId2, double amount) {
 
         try {
-            Optional<Users> user1Data = Optional.ofNullable(wallet.findByUsername(username));
+            Optional<Users> user1Data = wallet.findById(userId1);
             Optional<Users> user2Data = wallet.findById(userId2);
             if (user1Data.isPresent() && user2Data.isPresent()) {
 
                 Users currentUsers1Data = user1Data.get();
                 Users currentUsers2Data = user2Data.get();
                 double currentBalance1 = currentUsers1Data.getBalance();
-                if (u.getBalance() <= moneyConfig.getMaxTransferAmount()) {
-                    // Check if the current balance is sufficient
-                    if (currentBalance1 >= u.getBalance()) {
+                if (amount <= moneyConfig.getMaxTransferAmount()) {
+                    if (currentBalance1 >= amount) {
                         double currentBalance2 = currentUsers2Data.getBalance();
-                        currentUsers1Data.setBalance(currentBalance1 - u.getBalance());
-                        currentUsers2Data.setBalance(currentBalance2 + u.getBalance());
+                        currentUsers1Data.setBalance(currentBalance1 - amount);
+                        currentUsers2Data.setBalance(currentBalance2 + amount);
                         Users updatedUsers1Data = wallet.save(currentUsers1Data);
                         UserDTO dto = new UserDTO(updatedUsers1Data);
 
                         return new ResponseEntity<>(dto, HttpStatus.CREATED);
                     } else {
-
-                        ErrorResponse insufficientBalanceError = new ErrorResponse("Insufficient balance for transfer");
-                        return new ResponseEntity<>(insufficientBalanceError, HttpStatus.BAD_REQUEST);
+                        return new ResponseEntity<>(new ErrorResponse("Insufficient balance for transfer"), HttpStatus.BAD_REQUEST);
                     }
                 } else {
-
-                    ErrorResponse maxTransferAmountError = new ErrorResponse("Exceeded maximum transfer amount");
-                    return new ResponseEntity<>(maxTransferAmountError, HttpStatus.BAD_REQUEST);
+                    return new ResponseEntity<>(new ErrorResponse("Exceeded maximum transfer amount"), HttpStatus.BAD_REQUEST);
                 }
             }
-
-
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -145,45 +138,37 @@ public  class walletServices implements walletRepo2 {
 
 
     @Override
-    public ResponseEntity<String> checkBalance(Long userId){
+    public ResponseEntity<?> checkBalance(Long userId){
         Optional<Users> user1Data = wallet.findById(userId);
         if (user1Data.isPresent()) {
             Users usersData = user1Data.get();
             double balance = usersData.getBalance();
-            return  ResponseEntity.status(HttpStatus.OK).body("Wallet Amount : " + balance);
+            return  ResponseEntity.status(HttpStatus.OK).body(new ErrorResponse("Wallet Amount : " + balance));
         }
-        return ResponseEntity.status(HttpStatus.OK).body("No User Found");
+        return ResponseEntity.status(HttpStatus.OK).body(new ErrorResponse("No User Found"));
     }
 
 
     @Override
-    public ResponseEntity<List<Transaction>> getHistory(Long userId){
+    public ResponseEntity<?> getHistory(Long userId){
         List<Transaction> history= t_rep.findByuserIdOrderByTimestampDesc(userId);
         return new ResponseEntity<>(history, HttpStatus.OK);
     }
 
     @Override
-    public String removeUser(Long userId){
+    public ResponseEntity<?> removeUser(Long userId){
         Optional<Users> user = wallet.findById(userId);
         if (user.isPresent()) {
-//            Users removedUser = user.get();
-//            List<Transaction> userTransactions = removedUser.getTransactions();
-//            if (userTransactions != null) {
-//                t_rep.deleteAll(userTransactions);
-//            }
             wallet.deleteById(userId);
-
-            return "Wallet of user with Users Id: "+userId+" is Deleted";
+            return new ResponseEntity<>(new ErrorResponse("Wallet of user with Users Id: "+userId+" is Deleted"),HttpStatus.OK);
         }
-        return "No user Found";
+        return ResponseEntity.status(HttpStatus.OK).body(new ErrorResponse("No User Found"));
     }
 
 
-
         @Override
-        public List<Transaction> filterTransactions(Long userId, String transactionType) {
-
-            return t_rep.findByuserIdAndTransactionTypeOrderByTimestampDesc(userId,transactionType);
+        public ResponseEntity<?> filterTransactions(Long userId, String transactionType) {
+            return new ResponseEntity<>(t_rep.findByuserIdAndTransactionTypeOrderByTimestampDesc(userId,transactionType),HttpStatus.OK);
         }
 
 
