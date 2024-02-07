@@ -9,5 +9,5 @@ public interface transactionRepository extends JpaRepository<Transaction,Long> {
 
     List<Transaction> findByuserIdOrderByTimestampDesc(Long userId);
     List<Transaction> findByuserIdAndTransactionTypeOrderByTimestampDesc(Long userId,String transactionType);
-    void deleteAllByUserId(Long userId);
+
 }

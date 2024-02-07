@@ -1,16 +1,10 @@
 package com.project.DigitalWallet.repo;
-
-import com.project.DigitalWallet.DTO.DTO2;
-import com.project.DigitalWallet.DTO.UserDTO;
-import com.project.DigitalWallet.Model.Transaction;
 import com.project.DigitalWallet.Model.Users;
 import org.springframework.http.ResponseEntity;
 
-import java.util.List;
+public interface walletRepository2 {
+    ResponseEntity<?> createWallet(Users u);
 
-public interface walletRepo2 {
-    ResponseEntity<UserDTO> createWallet(Users u);
-    String getDateTime();
     void saveTransaction(Long userId,String type,double amount,String formattedTimeStamp);
 
 ResponseEntity<?> addMoney(Long userId,double amount);
