@@ -1,6 +1,7 @@
 package com.project.DigitalWallet.Model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import lombok.Data;
 import org.springframework.stereotype.Component;
 
@@ -8,19 +9,17 @@ import org.springframework.stereotype.Component;
 @Entity
 @Table(name = "users")
 @Component
-//@Builder
 public class Users {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
 
     private Long userId;
-//    private String password;
     private String name;
-//    @Column(unique = true)
-//    private String username;
     private Long contactNumber;
-    private double balance;
+    @Min(value = 0, message = "Balance must be positive")
+    private double amount;
+
 
 
 }

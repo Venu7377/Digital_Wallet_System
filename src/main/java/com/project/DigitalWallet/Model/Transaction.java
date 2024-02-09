@@ -2,6 +2,7 @@ package com.project.DigitalWallet.Model;
 
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import lombok.Data;
 
 @Data
@@ -9,11 +10,6 @@ import lombok.Data;
 @Table(name = "transactions")
 
 public class Transaction {
-//    @ManyToOne
-//
-//    @JoinColumn(name = "userId")
-//
-//    private Users us;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -22,7 +18,7 @@ public class Transaction {
     private Long userId;
 
     private String transactionType;
-
+    @Min(value = 0, message = "Balance must be positive")
     private double amount;
 
     private String timestamp;

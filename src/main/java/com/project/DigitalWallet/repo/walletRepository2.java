@@ -1,5 +1,6 @@
 package com.project.DigitalWallet.repo;
 import com.project.DigitalWallet.Model.Users;
+import com.project.DigitalWallet.TransferRequest;
 import org.springframework.http.ResponseEntity;
 
 public interface walletRepository2 {
@@ -7,11 +8,11 @@ public interface walletRepository2 {
 
     void saveTransaction(Long userId,String type,double amount,String formattedTimeStamp);
 
-ResponseEntity<?> addMoney(Long userId,double amount);
-    ResponseEntity<?> transferMoney(Long userId1, Long userId2, double amount);
-     ResponseEntity<?> checkBalance(Long userId);
-     ResponseEntity<?> getHistory(Long userId);
-     ResponseEntity<?> removeUser(Long userId);
+    ResponseEntity<?> addMoney(Users u,String password);
+    ResponseEntity<?> transferMoney(TransferRequest transferRequest,String password);
+     ResponseEntity<?> checkAmount(Long userId,String password);
+     ResponseEntity<?> getHistory(Long userId,String password);
+     ResponseEntity<?> removeUser(Long userId,String password);
 
-    ResponseEntity<?> filterTransactions(Long userId, String transactionType);
+    ResponseEntity<?> filterTransactions(Long userId, String transactionType,String password);
 }

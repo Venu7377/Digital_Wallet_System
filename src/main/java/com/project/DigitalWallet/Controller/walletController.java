@@ -3,7 +3,7 @@ package com.project.DigitalWallet.Controller;
 import com.project.DigitalWallet.Model.Users;
 import com.project.DigitalWallet.Service.walletServices;
 import com.project.DigitalWallet.TransferRequest;
-import com.project.DigitalWallet.UserInfo;
+import com.project.DigitalWallet.DTO.UserDtoForAdmin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,50 +27,47 @@ public class walletController {
 
 
 @PostMapping ("/user/loadMoney")
-public ResponseEntity<?> addMoney(@RequestBody Users u) {
-       return walletService.addMoney(u.getUserId(), u.getBalance());
+public ResponseEntity<?> addMoney(@RequestBody Users u,@RequestHeader("Password") String password) {
+       return walletService.addMoney(u,password);
     }
 
 
 
     @PostMapping("/user/transferMoney")
-    public ResponseEntity<?> transferMoney(@RequestBody TransferRequest t) {
-        Long userId1 = t.getFromUserId();
-        Long userId2 = t.getToUserId();
-        return walletService.transferMoney(userId1, userId2, t.getBalance());
+    public ResponseEntity<?> transferMoney(@RequestBody TransferRequest t,@RequestHeader("Password") String password) {
+        return walletService.transferMoney(t,password);
     }
 
 
     @GetMapping("/user/fetchBalance")
-    public ResponseEntity<?> checkBalance(@RequestParam Long userId) {
-                return walletService.checkBalance(userId);
+    public ResponseEntity<?> checkBalance(@RequestParam Long userId,@RequestHeader("Password") String password) {
+                return walletService.checkAmount(userId,password);
     }
 
 
     @GetMapping("/user/fetchHistory")
-    public ResponseEntity<?> getHistory(@RequestParam Long userId){
-                return walletService.getHistory(userId);
+    public ResponseEntity<?> getHistory(@RequestParam Long userId,@RequestHeader("Password") String password){
+                return walletService.getHistory(userId,password);
     }
 
 
-
     @GetMapping("/user/transactions/filter")
-    public ResponseEntity<?> filterTransactions( @RequestParam Long userId, @RequestParam String transactionType)
+    public ResponseEntity<?> filterTransactions( @RequestParam Long userId, @RequestParam String transactionType,@RequestHeader("Password") String password)
     {
-        return walletService.filterTransactions(userId,transactionType);
+        return walletService.filterTransactions(userId,transactionType,password);
 
     }
 
 
     @DeleteMapping("/user/removeUser")
-    public  ResponseEntity<?> removeUser(@RequestParam Long userId){
+    public  ResponseEntity<?> removeUser(@RequestParam Long userId,@RequestHeader("Password") String password){
 
-        return walletService.removeUser(userId);
+        return walletService.removeUser(userId,password);
     }
 
     @GetMapping("/admin/getAllUsers")
     public ResponseEntity<?> getAllUsers() {
-        List<UserInfo> allUsers = walletService.getAllUsers();
+        List<UserDtoForAdmin> allUsers = walletService.getAllUsers();
         return new ResponseEntity<>(allUsers, HttpStatus.OK);
     }
 

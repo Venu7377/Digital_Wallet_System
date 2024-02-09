@@ -3,10 +3,10 @@ package com.project.DigitalWallet;
 import lombok.Getter;
 
 @Getter
-public class Response {
+public class JSONResponse {
     private String message;
 
-    public Response(String message) {
+    public JSONResponse(String message) {
         this.message = message;
     }
 

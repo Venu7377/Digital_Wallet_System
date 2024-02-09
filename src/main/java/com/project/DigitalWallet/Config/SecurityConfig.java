@@ -47,9 +47,11 @@ public class SecurityConfig {
                         .hasRole("User")
                         .requestMatchers("/digitalWalletSystem/v1/wallet/admin/**")
                         .hasRole("Admin")
+                        .requestMatchers("/h2-ui/**").permitAll()
                         .anyRequest()
                         .authenticated());
         http.httpBasic(Customizer.withDefaults());
+        http.headers(AbstractHttpConfigurer::disable);
         return http.build();
     }
 
