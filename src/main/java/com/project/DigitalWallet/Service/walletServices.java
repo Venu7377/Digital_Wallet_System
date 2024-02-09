@@ -142,9 +142,9 @@ public  class walletServices implements walletRepository2 {
 
     @Override
     public ResponseEntity<?> checkAmount(Long userId,String password) {
+        Users currentUserData = wallet.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
         if (passwordEncoder.matches(password, getPasswordByUserId(userId))) {
-            Users currentUserData = wallet.findById(userId)
-                    .orElseThrow(() -> new UserNotFoundException(userId));
             double amount = currentUserData.getAmount();
             return ResponseEntity.status(HttpStatus.OK).body(new JSONResponse("Your Wallet Amount : " + amount));
         }
@@ -154,19 +154,22 @@ public  class walletServices implements walletRepository2 {
 
     @Override
     public ResponseEntity<?> getHistory(Long userId,String password) {
+        Users currentUserData = wallet.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
         if (passwordEncoder.matches(password, getPasswordByUserId(userId))) {
-            Users currentUserData = wallet.findById(userId)
-                    .orElseThrow(() -> new UserNotFoundException(userId));
+
             List<Transaction> history = t_rep.findByuserIdOrderByTimestampDesc(userId);
             return new ResponseEntity<>(history, HttpStatus.OK);
         }
         throw new InvalidPasswordException();
     }
+
     @Override
     public ResponseEntity<?> removeUser(Long userId,String password) {
+        Users currentUserData = wallet.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
         if (passwordEncoder.matches(password, getPasswordByUserId(userId))) {
-            Users currentUserData = wallet.findById(userId)
-                    .orElseThrow(() -> new UserNotFoundException(userId));
+
             wallet.deleteById(userId);
             return new ResponseEntity<>(new JSONResponse("Wallet of user with Users Id: " + userId + " is Deleted"), HttpStatus.OK);
 
@@ -176,9 +179,9 @@ public  class walletServices implements walletRepository2 {
 
     @Override
     public ResponseEntity<?> filterTransactions(Long userId, String transactionType,String password) {
+        Users currentUserData = wallet.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
         if (passwordEncoder.matches(password, getPasswordByUserId(userId))) {
-            Users currentUserData = wallet.findById(userId)
-                    .orElseThrow(() -> new UserNotFoundException(userId));
             return new ResponseEntity<>(t_rep.findByuserIdAndTransactionTypeOrderByTimestampDesc(userId, transactionType), HttpStatus.OK);
         }
         throw new InvalidPasswordException();
@@ -199,7 +202,6 @@ public  class walletServices implements walletRepository2 {
 
     public String getPasswordByUserId(Long userId) {
         Optional<PasswordEntity> passwordEntity = passwordRepository.findById(userId);
-
         if (passwordEntity.isPresent()) {
             return passwordEntity.get().getPassword();
         } else {
