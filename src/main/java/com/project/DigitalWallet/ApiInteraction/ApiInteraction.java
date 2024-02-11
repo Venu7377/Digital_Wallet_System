@@ -1,4 +1,4 @@
-package ApiInteraction;
+package com.project.DigitalWallet.ApiInteraction;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
