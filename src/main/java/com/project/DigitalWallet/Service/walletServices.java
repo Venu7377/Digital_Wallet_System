@@ -9,6 +9,7 @@ import com.project.DigitalWallet.Model.Transaction;
 import com.project.DigitalWallet.Model.Users;
 import com.project.DigitalWallet.JSONResponse;
 import com.project.DigitalWallet.PasswordGenerator.PasswordGenerator;
+import com.project.DigitalWallet.PropertyReader;
 import com.project.DigitalWallet.TransferRequest;
 import com.project.DigitalWallet.DTO.UserDtoForAdmin;
 import com.project.DigitalWallet.DTO.WalletCreationResponse;
@@ -40,6 +41,9 @@ public  class walletServices implements walletRepository2 {
 
     @Autowired
     Environment env;
+
+    @Autowired
+    PropertyReader propertyReader;
     @Autowired
     PasswordGenerator passwordGenerator;
     @Autowired
@@ -86,9 +90,12 @@ public  class walletServices implements walletRepository2 {
                 .orElseThrow(() -> new UserNotFoundException(u.getUserId()));
 
         if(passwordEncoder.matches(password,getPasswordByUserId(u.getUserId()))) {
+            String min_money=propertyReader.getProperty("money.load.min");
+             String max_money=propertyReader.getProperty("money.load.max");
 
-            if (u.getAmount() < Double.parseDouble(env.getProperty("money.load.min")) || u.getAmount() > Double.parseDouble(env.getProperty("money.load.max"))) {
-                throw new InvalidAmountException("Amount to be loaded should be between " + Double.parseDouble(env.getProperty("money.load.min")) + " and " + Double.parseDouble(env.getProperty("money.load.max")));
+
+            if (u.getAmount() < Double.parseDouble(min_money) || u.getAmount() > Double.parseDouble(max_money)) {
+                throw new InvalidAmountException("Amount to be loaded should be between " + Double.parseDouble(min_money) + " and " + Double.parseDouble(max_money));
             } else {
                 saveTransaction(u.getUserId(), "Loaded", u.getAmount(), getDateTime());
 
@@ -117,8 +124,8 @@ public  class walletServices implements walletRepository2 {
         if(passwordEncoder.matches(password,getPasswordByUserId(transferRequest.getFromUserId()))) {
 
             double currentAmount1 = currentUsers1Data.getAmount();
-
-            if (transferRequest.getAmount() <= Double.parseDouble(env.getProperty("money.transfer.max"))) {
+            String max_transfer_money=propertyReader.getProperty("money.transfer.max");
+            if (transferRequest.getAmount() <= Double.parseDouble(max_transfer_money)){
                 if (currentAmount1 >= transferRequest.getAmount()) {
                     double currentAmount2 = currentUsers2Data.getAmount();
                     currentUsers1Data.setAmount(currentAmount1 - transferRequest.getAmount());
@@ -132,7 +139,7 @@ public  class walletServices implements walletRepository2 {
                     throw new InvalidAmountException("Insufficient Amount for transfer");
                 }
             } else {
-                throw new InvalidAmountException("Maximum Amount that can be transferred is" + Double.parseDouble(env.getProperty("money.transfer.max")));
+                throw new InvalidAmountException("Maximum Amount that can be transferred is" + Double.parseDouble(max_transfer_money));
             }
         }
         throw new InvalidPasswordException();

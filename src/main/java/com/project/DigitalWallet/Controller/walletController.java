@@ -4,6 +4,10 @@ import com.project.DigitalWallet.Model.Users;
 import com.project.DigitalWallet.Service.walletServices;
 import com.project.DigitalWallet.TransferRequest;
 import com.project.DigitalWallet.DTO.UserDtoForAdmin;
+
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +16,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RequestMapping("digitalWalletSystem/v1")
-
+//@OpenAPIDefinition(info = @Info(title = "Digital Wallet System API", version = "v1"))
+@SecurityRequirement(name = "basicAuth")
 @RestController
 public class walletController {
 
