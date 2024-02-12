@@ -13,13 +13,13 @@ public class WalletCreationResponse {
     private Long userId;
     private String name;
     private Long contactNumber;
-    private double balance;
+    private double amount;
 
     public WalletCreationResponse(Users user, String generatedPassword) {
         this.name= user.getName();
         this.userId=user.getUserId();
         this.contactNumber=user.getContactNumber();
-        this.balance=user.getAmount();
+        this.amount=user.getAmount();
         this.Password = generatedPassword;
     }
 

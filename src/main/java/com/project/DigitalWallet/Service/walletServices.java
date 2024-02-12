@@ -9,6 +9,7 @@ import com.project.DigitalWallet.Model.Transaction;
 import com.project.DigitalWallet.Model.Users;
 import com.project.DigitalWallet.JSONResponse;
 import com.project.DigitalWallet.PasswordGenerator.PasswordGenerator;
+import com.project.DigitalWallet.PropertyReader;
 import com.project.DigitalWallet.TransferRequest;
 import com.project.DigitalWallet.DTO.UserDtoForAdmin;
 import com.project.DigitalWallet.DTO.WalletCreationResponse;
@@ -16,6 +17,8 @@ import com.project.DigitalWallet.repo.PasswordRepository;
 import com.project.DigitalWallet.repo.transactionRepository;
 import com.project.DigitalWallet.repo.walletRepository2;
 import com.project.DigitalWallet.repo.walletRepository;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
@@ -40,11 +43,15 @@ public  class walletServices implements walletRepository2 {
 
     @Autowired
     Environment env;
+
+    @Autowired
+    PropertyReader propertyReader;
     @Autowired
     PasswordGenerator passwordGenerator;
     @Autowired
     PasswordRepository passwordRepository;
     private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private static final Logger logger = LogManager.getLogger(walletServices.class);
 
     @Override
     public ResponseEntity<?> createWallet(Users u) {
@@ -55,9 +62,11 @@ public  class walletServices implements walletRepository2 {
             passwordEntity.setUserId(u.getUserId());
             passwordEntity.setPassword(passwordEncoder.encode(generatedPassword));
             passwordRepository.save(passwordEntity);
-            WalletCreationResponse response=new WalletCreationResponse(user,generatedPassword);
+            WalletCreationResponse response = new WalletCreationResponse(user, generatedPassword);
+            logger.info("Wallet created successfully for user: {}", u.getUserId());
             return new ResponseEntity<>(response, HttpStatus.CREATED);
         } catch (Exception e) {
+            logger.error("Error creating wallet for user: {}", u.getUserId(), e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -80,15 +89,18 @@ public  class walletServices implements walletRepository2 {
     }
 
     @Override
-    public ResponseEntity<?> addMoney(Users u,String password) {
+    public ResponseEntity<?> addMoney(Users u, String password) {
 
         Users currentUserData = wallet.findById(u.getUserId())
                 .orElseThrow(() -> new UserNotFoundException(u.getUserId()));
 
-        if(passwordEncoder.matches(password,getPasswordByUserId(u.getUserId()))) {
+        if (passwordEncoder.matches(password, getPasswordByUserId(u.getUserId()))) {
+            String min_money = propertyReader.getProperty("money.load.min");
+            String max_money = propertyReader.getProperty("money.load.max");
 
-            if (u.getAmount() < Double.parseDouble(env.getProperty("money.load.min")) || u.getAmount() > Double.parseDouble(env.getProperty("money.load.max"))) {
-                throw new InvalidAmountException("Amount to be loaded should be between " + Double.parseDouble(env.getProperty("money.load.min")) + " and " + Double.parseDouble(env.getProperty("money.load.max")));
+
+            if (u.getAmount() < Double.parseDouble(min_money) || u.getAmount() > Double.parseDouble(max_money)) {
+                throw new InvalidAmountException("Amount to be loaded should be between " + Double.parseDouble(min_money) + " and " + Double.parseDouble(max_money));
             } else {
                 saveTransaction(u.getUserId(), "Loaded", u.getAmount(), getDateTime());
 
@@ -96,17 +108,17 @@ public  class walletServices implements walletRepository2 {
             double currentAmount = currentUserData.getAmount();
             currentUserData.setAmount(currentAmount + u.getAmount());
             Users updatedUsersData = wallet.save(currentUserData);
-            UserDTO dto=new UserDTO(updatedUsersData);
+            UserDTO dto = new UserDTO(updatedUsersData);
+            logger.info("Money added successfully to user's wallet: {}", u.getUserId());
             return new ResponseEntity<>(dto, HttpStatus.CREATED);
         }
+        logger.warn("Invalid password for addMoney operation for user: {}", u.getUserId());
         throw new InvalidPasswordException();
     }
 
 
-    
-    
     @Override
-    public ResponseEntity<?> transferMoney(TransferRequest transferRequest,String password) {
+    public ResponseEntity<?> transferMoney(TransferRequest transferRequest, String password) {
 
         Users currentUsers1Data = wallet.findById(transferRequest.getFromUserId())
                 .orElseThrow(() -> new UserNotFoundException(transferRequest.getFromUserId()));
@@ -114,101 +126,120 @@ public  class walletServices implements walletRepository2 {
         Users currentUsers2Data = wallet.findById(transferRequest.getToUserId())
                 .orElseThrow(() -> new UserNotFoundException(transferRequest.getToUserId()));
 
-        if(passwordEncoder.matches(password,getPasswordByUserId(transferRequest.getFromUserId()))) {
+        if (passwordEncoder.matches(password, getPasswordByUserId(transferRequest.getFromUserId()))) {
 
             double currentAmount1 = currentUsers1Data.getAmount();
-
-            if (transferRequest.getAmount() <= Double.parseDouble(env.getProperty("money.transfer.max"))) {
+            String max_transfer_money = propertyReader.getProperty("money.transfer.max");
+            if (transferRequest.getAmount() <= Double.parseDouble(max_transfer_money)) {
                 if (currentAmount1 >= transferRequest.getAmount()) {
                     double currentAmount2 = currentUsers2Data.getAmount();
                     currentUsers1Data.setAmount(currentAmount1 - transferRequest.getAmount());
                     currentUsers2Data.setAmount(currentAmount2 + transferRequest.getAmount());
                     Users updatedUsers1Data = wallet.save(currentUsers1Data);
-                    UserDTO dto=new UserDTO(updatedUsers1Data);
+                    UserDTO dto = new UserDTO(updatedUsers1Data);
                     saveTransaction(transferRequest.getFromUserId(), "Debited", transferRequest.getAmount(), getDateTime());
                     saveTransaction(transferRequest.getToUserId(), "Credited", transferRequest.getAmount(), getDateTime());
+                    logger.info("Money transferred successfully from user {} to user {}: {}",
+                            transferRequest.getFromUserId(), transferRequest.getToUserId(), transferRequest.getAmount());
                     return new ResponseEntity<>(dto, HttpStatus.CREATED);
                 } else {
                     throw new InvalidAmountException("Insufficient Amount for transfer");
                 }
             } else {
-                throw new InvalidAmountException("Maximum Amount that can be transferred is" + Double.parseDouble(env.getProperty("money.transfer.max")));
+                throw new InvalidAmountException("Maximum Amount that can be transferred is" + Double.parseDouble(max_transfer_money));
             }
         }
-        throw new InvalidPasswordException();
-    }
-
-
-
-    @Override
-    public ResponseEntity<?> checkAmount(Long userId,String password) {
-        Users currentUserData = wallet.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
-        if (passwordEncoder.matches(password, getPasswordByUserId(userId))) {
-            double amount = currentUserData.getAmount();
-            return ResponseEntity.status(HttpStatus.OK).body(new JSONResponse("Your Wallet Amount : " + amount));
-        }
+        logger.warn("Invalid password for transferMoney operation for user: {}", transferRequest.getFromUserId());
         throw new InvalidPasswordException();
     }
 
 
     @Override
-    public ResponseEntity<?> getHistory(Long userId,String password) {
-        Users currentUserData = wallet.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
-        if (passwordEncoder.matches(password, getPasswordByUserId(userId))) {
+    public ResponseEntity<?> checkAmount(Long userId, String password) {
 
-            List<Transaction> history = t_rep.findByuserIdOrderByTimestampDesc(userId);
-            return new ResponseEntity<>(history, HttpStatus.OK);
-        }
-        throw new InvalidPasswordException();
+            Users currentUserData = wallet.findById(userId)
+                    .orElseThrow(() -> new UserNotFoundException(userId));
+            if (passwordEncoder.matches(password, getPasswordByUserId(userId))) {
+                double amount = currentUserData.getAmount();
+                logger.info("Checked wallet amount for user: {}", userId);
+                return ResponseEntity.status(HttpStatus.OK).body(new JSONResponse("Your Wallet Amount : " + amount));
+            }
+            logger.warn("Invalid password for checkAmount operation for user: {}", userId);
+            throw new InvalidPasswordException();
+
     }
 
     @Override
-    public ResponseEntity<?> removeUser(Long userId,String password) {
-        Users currentUserData = wallet.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
-        if (passwordEncoder.matches(password, getPasswordByUserId(userId))) {
+    public ResponseEntity<?> getHistory(Long userId, String password) {
 
-            wallet.deleteById(userId);
-            return new ResponseEntity<>(new JSONResponse("Wallet of user with Users Id: " + userId + " is Deleted"), HttpStatus.OK);
+            Users currentUserData = wallet.findById(userId)
+                    .orElseThrow(() -> new UserNotFoundException(userId));
+            if (passwordEncoder.matches(password, getPasswordByUserId(userId))) {
 
-        }
-        throw new InvalidPasswordException();
+                List<Transaction> history = t_rep.findByuserIdOrderByTimestampDesc(userId);
+                logger.info("Retrieved transaction history for user: {}", userId);
+                return new ResponseEntity<>(history, HttpStatus.OK);
+            }
+            logger.warn("Invalid password for getHistory operation for user: {}", userId);
+            throw new InvalidPasswordException();
+
     }
 
     @Override
-    public ResponseEntity<?> filterTransactions(Long userId, String transactionType,String password) {
-        Users currentUserData = wallet.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
-        if (passwordEncoder.matches(password, getPasswordByUserId(userId))) {
-            return new ResponseEntity<>(t_rep.findByuserIdAndTransactionTypeOrderByTimestampDesc(userId, transactionType), HttpStatus.OK);
-        }
-        throw new InvalidPasswordException();
+    public ResponseEntity<?> removeUser(Long userId, String password) {
+
+            Users currentUserData = wallet.findById(userId)
+                    .orElseThrow(() -> new UserNotFoundException(userId));
+            if (passwordEncoder.matches(password, getPasswordByUserId(userId))) {
+                wallet.deleteById(userId);
+                logger.info("Removed user with Users Id: {}", userId);
+                return new ResponseEntity<>(new JSONResponse("Wallet of user with Users Id: " + userId + " is Deleted"), HttpStatus.OK);
+
+            }
+            logger.warn("Invalid password for removeUser operation for user: {}", userId);
+            throw new InvalidPasswordException();
+
+    }
+
+    @Override
+    public ResponseEntity<?> filterTransactions(Long userId, String transactionType, String password) {
+
+            Users currentUserData = wallet.findById(userId)
+                    .orElseThrow(() -> new UserNotFoundException(userId));
+            if (passwordEncoder.matches(password, getPasswordByUserId(userId))) {
+                logger.info("Filtered transactions for user: {}", userId);
+                return new ResponseEntity<>(t_rep.findByuserIdAndTransactionTypeOrderByTimestampDesc(userId, transactionType), HttpStatus.OK);
+            }
+            logger.warn("Invalid password for filterTransactions operation for user: {}", userId);
+            throw new InvalidPasswordException();
+
     }
 
     public List<UserDtoForAdmin> getAllUsers() {
-        List<Users> allUsers = wallet.findAll();
-        List<UserDtoForAdmin> userInfoList = new ArrayList<>();
 
-        for (Users user : allUsers) {
-            UserDtoForAdmin userInfo = new UserDtoForAdmin(user.getUserId(), user.getName());
-            userInfoList.add(userInfo);
-        }
+            List<Users> allUsers = wallet.findAll();
+            List<UserDtoForAdmin> userInfoList = new ArrayList<>();
 
-        return userInfoList;
+            for (Users user : allUsers) {
+                UserDtoForAdmin userInfo = new UserDtoForAdmin(user.getUserId(), user.getName());
+                userInfoList.add(userInfo);
+            }
+            logger.info("Retrieved information for all users");
+            return userInfoList;
     }
 
 
     public String getPasswordByUserId(Long userId) {
-        Optional<PasswordEntity> passwordEntity = passwordRepository.findById(userId);
-        if (passwordEntity.isPresent()) {
-            return passwordEntity.get().getPassword();
-        } else {
-            return null;
-        }
+
+            Optional<PasswordEntity> passwordEntity = passwordRepository.findById(userId);
+            if (passwordEntity.isPresent()) {
+                return passwordEntity.get().getPassword();
+            } else {
+                return null;
+            }
+
     }
-
-
 }
+
+
 

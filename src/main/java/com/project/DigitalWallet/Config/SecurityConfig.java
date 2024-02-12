@@ -1,4 +1,6 @@
 package com.project.DigitalWallet.Config;
+
+import com.project.DigitalWallet.PropertyReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,27 +15,33 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
-import java.util.Objects;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-
     @Autowired
-    Environment env;
+    PropertyReader propertyReader;
+
+
     @Bean
     public InMemoryUserDetailsManager userDetailsManager()
     {
-        UserDetails user1 = User.builder()
-                .username(Objects.requireNonNull(env.getProperty("user1.username")))
-                .password(passwordEncoder().encode(env.getProperty("user1.password")))
-                .roles(env.getProperty("user1.role"))
-                .build();
+        String user_username = propertyReader.getProperty("user1.username");
+        String user_password = propertyReader.getProperty("user1.password");
+        String user_role = propertyReader.getProperty("user1.role");
 
+        UserDetails user1 = User.builder()
+                .username(user_username)
+                .password(passwordEncoder().encode(user_password))
+                .roles(user_role)
+                .build();
+        String admin_username = propertyReader.getProperty("user2.username");
+        String admin_password = propertyReader.getProperty("user2.password");
+        String admin_role = propertyReader.getProperty("user2.role");
         UserDetails user2 = User.builder()
-                .username(Objects.requireNonNull(env.getProperty("user2.username")))
-                .password(passwordEncoder().encode(env.getProperty("user2.password")))
-                .roles(env.getProperty("user2.role"))
+                .username(admin_username)
+                .password(passwordEncoder().encode(admin_password))
+                .roles(admin_role)
                 .build();
         return new InMemoryUserDetailsManager(user1,user2);
     }

@@ -16,5 +16,4 @@ public class PasswordEntity {
     private Long userId;
     private String Password;
 
-
 }

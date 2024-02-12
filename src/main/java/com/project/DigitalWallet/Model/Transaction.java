@@ -14,13 +14,9 @@ public class Transaction {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long Transaction_id;
-
     private Long userId;
-
     private String transactionType;
-    @Min(value = 0, message = "Balance must be positive")
     private double amount;
-
     private String timestamp;
 
 

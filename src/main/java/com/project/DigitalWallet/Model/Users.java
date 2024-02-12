@@ -17,7 +17,6 @@ public class Users {
     private Long userId;
     private String name;
     private Long contactNumber;
-    @Min(value = 0, message = "Balance must be positive")
     private double amount;
 
 

@@ -1,24 +1,34 @@
 package com.project.DigitalWallet.Controller;
 
+import com.project.DigitalWallet.ApiInteraction.ExternalInteraction;
 import com.project.DigitalWallet.Model.Users;
 import com.project.DigitalWallet.Service.walletServices;
 import com.project.DigitalWallet.TransferRequest;
 import com.project.DigitalWallet.DTO.UserDtoForAdmin;
+
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RequestMapping("digitalWalletSystem/v1")
-
+//@OpenAPIDefinition(info = @Info(title = "Digital Wallet System API", version = "v1"))
+@SecurityRequirement(name = "basicAuth")
 @RestController
 public class walletController {
-
     @Autowired
     walletServices walletService;
+    private final ExternalInteraction externalInteraction;
 
+    public walletController(ExternalInteraction externalInteraction) {
+        this.externalInteraction = externalInteraction;
+    }
 
     @PostMapping("/user/createWallet")
    public ResponseEntity<?> addUser(@RequestBody Users u) {
@@ -72,4 +82,15 @@ public ResponseEntity<?> addMoney(@RequestBody Users u,@RequestHeader("Password"
     }
 
 
+
+    @GetMapping("/fetchExternalWallet")
+    public String makeApiCall() {
+        try {
+            return externalInteraction.makeApiCall();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "Error making API call";
+        }
+    }
 }
+

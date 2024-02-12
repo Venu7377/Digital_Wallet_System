@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Configuration>
+
+
+    <Properties>
+        <property name="LOG_PATH" value="./logs" />
+        <property name="LOG_FILE_NAME" value="application-log4j2" />
+    </Properties>
+
+    <Appenders>
+        <Console name="ConsoleOutput" target="SYSTEM_OUT">
+            <PatternLayout
+                    pattern="%style{%d{yyyy-MM-dd HH:mm:ss}}{white} %highlight{%-5level} [%style{%t}{bright,yellow}] : %msg%n%throwable"
+                    disableAnsi="false" />
+        </Console>
+
+
+        <RollingFile name="LogFile"
+                     fileName="${LOG_PATH}/${LOG_FILE_NAME}.log"
+                     filePattern="${LOG_PATH}/$${date:yyyy-MM}/application-log4j2-%d{dd-MMMM-yyyy}-%i.log.gz">
+            <PatternLayout>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level : %msg%n
+                </pattern>
+            </PatternLayout>
+            <Policies>
+                <OnStartupTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="10 MB" />
+                <TimeBasedTriggeringPolicy />
+            </Policies>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+
+
+        <Root level="info">
+            <AppenderRef ref="ConsoleOutput" />
+            <AppenderRef ref="LogFile" />
+        </Root>
+
+
+        <logger name="com.log" level="trace" additivity="false">
+            <appender-ref ref="LogFile" />
+            <appender-ref ref="ConsoleOutput" />
+        </logger>
+
+    </Loggers>
+
+</Configuration>
