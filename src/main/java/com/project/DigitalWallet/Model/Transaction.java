@@ -2,7 +2,6 @@ package com.project.DigitalWallet.Model;
 
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
 import lombok.Data;
 
 @Data

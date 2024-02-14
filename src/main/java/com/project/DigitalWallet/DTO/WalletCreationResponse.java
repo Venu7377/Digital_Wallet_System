@@ -12,7 +12,7 @@ public class WalletCreationResponse {
     private String Password;
     private Long userId;
     private String name;
-    private Long contactNumber;
+    private String contactNumber;
     private double amount;
 
     public WalletCreationResponse(Users user, String generatedPassword) {

@@ -11,7 +11,7 @@ public class UserDTO {
 
     private Long userId;
     private String name;
-    private Long contactNumber;
+    private String contactNumber;
     private double amount;
 
     public UserDTO(Users user) {
