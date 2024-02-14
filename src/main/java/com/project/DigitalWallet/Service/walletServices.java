@@ -12,6 +12,7 @@ import com.project.DigitalWallet.Model.Transaction;
 import com.project.DigitalWallet.Model.Users;
 import com.project.DigitalWallet.PasswordGenerator.PasswordGenerator;
 import com.project.DigitalWallet.PropertyReader;
+import com.project.DigitalWallet.ResponseCode;
 import com.project.DigitalWallet.TransferRequest;
 import com.project.DigitalWallet.repo.PasswordRepository;
 import com.project.DigitalWallet.repo.transactionRepository;
@@ -64,9 +65,9 @@ public  class walletServices implements walletRepository2 {
             WalletCreationResponse response = new WalletCreationResponse(user, generatedPassword);
             logger.info("Wallet created successfully for user: {}", u.getUserId());
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(new ApiResponse<>(HttpStatus.CREATED.value(), "Wallet created successfully", response));
+                    .body(new ApiResponse<>(ResponseCode.SUCCESS.getCode(), ResponseCode.SUCCESS.getDescription(), response));
         } catch (DataIntegrityViolationException e) {
-            logger.error("Error creating wallet for user: {}", u.getUserId(), e);
+            logger.error("Error creating wallet for user: {}", u.getUserId());
             throw e;
         }
     }
@@ -107,7 +108,7 @@ public  class walletServices implements walletRepository2 {
             UserDTO dto = new UserDTO(updatedUsersData);
             logger.info("Money added successfully to user's wallet: {}", u.getUserId());
             return ResponseEntity.status(HttpStatus.OK)
-                    .body(new ApiResponse<>(HttpStatus.OK.value(), "Money added successfully", dto));
+                    .body(new ApiResponse<>(ResponseCode.SUCCESS.getCode(), ResponseCode.SUCCESS.getDescription(), dto));
         }
         logger.warn("Invalid password for addMoney operation for user: {}", u.getUserId());
         throw new InvalidPasswordException();
@@ -140,7 +141,7 @@ public  class walletServices implements walletRepository2 {
                             transferRequest.getFromUserId(), transferRequest.getToUserId(), transferRequest.getAmount());
 
                     return ResponseEntity.status(HttpStatus.OK)
-                            .body(new ApiResponse<>(HttpStatus.OK.value(), "Money transferred successfully", dto));
+                            .body(new ApiResponse<>(ResponseCode.SUCCESS.getCode(), ResponseCode.SUCCESS.getDescription(), dto));
                 } else {
                     saveTransaction(transferRequest.getFromUserId(), "Failed", transferRequest.getAmount(), getDateTime());
 
@@ -166,7 +167,7 @@ public  class walletServices implements walletRepository2 {
                 double amount = currentUserData.getAmount();
                 logger.info("Checked wallet amount for user: {}", userId);
                 return ResponseEntity.status(HttpStatus.OK)
-                        .body(new ApiResponse<>(HttpStatus.OK.value(), "Checked wallet amount successfully","Your Wallet Amount : " + amount));
+                        .body(new ApiResponse<>(ResponseCode.SUCCESS.getCode(), ResponseCode.SUCCESS.getDescription(), "Your Wallet Amount : " + amount));
             }
             logger.warn("Invalid password for checkAmount operation for user: {}", userId);
             throw new InvalidPasswordException();
@@ -186,7 +187,7 @@ public  class walletServices implements walletRepository2 {
                 List<Transaction> history = t_rep.findByuserIdOrderByTimestampDesc(userId);
                 logger.info("Retrieved transaction history for user: {}", userId);
                 return ResponseEntity.status(HttpStatus.OK)
-                        .body(new ApiResponse<>(HttpStatus.OK.value(), "History Fetched Successfully", history));
+                        .body(new ApiResponse<>(ResponseCode.SUCCESS.getCode(), ResponseCode.SUCCESS.getDescription(), history));
             }
             logger.warn("Invalid password for getHistory operation for user: {}", userId);
             throw new InvalidPasswordException();
@@ -202,7 +203,7 @@ public  class walletServices implements walletRepository2 {
                 wallet.deleteById(userId);
                 logger.info("Removed user with Users Id: {}", userId);
                 return ResponseEntity.status(HttpStatus.OK)
-                        .body(new ApiResponse<>(HttpStatus.OK.value(), " wallet deleted successfully", "Wallet of user with Users Id: " + userId + " is Deleted"));
+                        .body(new ApiResponse<>(ResponseCode.SUCCESS.getCode(), ResponseCode.SUCCESS.getDescription(), "Wallet of user with Users Id: " + userId + " is Deleted"));
             }
             logger.warn("Invalid password for removeUser operation for user: {}", userId);
             throw new InvalidPasswordException();
@@ -218,7 +219,7 @@ public  class walletServices implements walletRepository2 {
                 List<Transaction> filteredTransactions = t_rep.findByuserIdAndTransactionTypeOrderByTimestampDesc(userId, transactionType);
                 logger.info("Filtered transactions for user: {}", userId);
                 return ResponseEntity.status(HttpStatus.OK)
-                        .body(new ApiResponse<>(HttpStatus.OK.value(), "Transactions Fetched Successfully", filteredTransactions));
+                        .body(new ApiResponse<>(ResponseCode.SUCCESS.getCode(), ResponseCode.SUCCESS.getDescription(), filteredTransactions));
             }
             logger.warn("Invalid password for filterTransactions operation for user: {}", userId);
             throw new InvalidPasswordException();
@@ -236,7 +237,7 @@ public  class walletServices implements walletRepository2 {
             }
             logger.info("Retrieved information for all users");
         return ResponseEntity.status(HttpStatus.OK)
-                .body(new ApiResponse<>(HttpStatus.OK.value(), "All users fetched Successfully", userInfoList));
+                .body(new ApiResponse<>(ResponseCode.SUCCESS.getCode(), ResponseCode.SUCCESS.getDescription(), userInfoList));
 
     }
 

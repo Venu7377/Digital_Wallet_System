@@ -8,10 +8,10 @@ import lombok.Setter;
 @Setter
 public class ApiResponse<T> {
 
-    private int responseCode;
+    private String responseCode;
     private String responseDescription;
     private T responseData;
-    public ApiResponse(int responseCode, String responseDescription, T responseData) {
+    public ApiResponse(String responseCode, String responseDescription, T responseData) {
         this.responseCode = responseCode;
         this.responseDescription = responseDescription;
         this.responseData = responseData;

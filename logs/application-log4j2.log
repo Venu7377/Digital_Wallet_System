@@ -1,46 +1,53 @@
-2024-02-14 18:25:51 [background-preinit] INFO  : HV000001: Hibernate Validator 8.0.1.Final
-2024-02-14 18:25:51 [main] INFO  : Starting DigitalWalletApplication using Java 21.0.2 with PID 5568 (D:\Venug\Digital_Wallet_System\target\classes started by gokul.s in D:\Venug\Digital_Wallet_System)
-2024-02-14 18:25:51 [main] INFO  : No active profile set, falling back to 1 default profile: "default"
-2024-02-14 18:25:52 [main] INFO  : Multiple Spring Data modules found, entering strict repository configuration mode
-2024-02-14 18:25:52 [main] INFO  : Bootstrapping Spring Data JDBC repositories in DEFAULT mode.
-2024-02-14 18:25:52 [main] INFO  : Spring Data JDBC - Could not safely identify store assignment for repository candidate interface com.project.DigitalWallet.repo.PasswordRepository; If you want this repository to be a JDBC repository, consider annotating your entities with one of these annotations: org.springframework.data.relational.core.mapping.Table.
-2024-02-14 18:25:52 [main] INFO  : Spring Data JDBC - Could not safely identify store assignment for repository candidate interface com.project.DigitalWallet.repo.transactionRepository; If you want this repository to be a JDBC repository, consider annotating your entities with one of these annotations: org.springframework.data.relational.core.mapping.Table.
-2024-02-14 18:25:52 [main] INFO  : Spring Data JDBC - Could not safely identify store assignment for repository candidate interface com.project.DigitalWallet.repo.walletRepository; If you want this repository to be a JDBC repository, consider annotating your entities with one of these annotations: org.springframework.data.relational.core.mapping.Table.
-2024-02-14 18:25:52 [main] INFO  : Finished Spring Data repository scanning in 37 ms. Found 0 JDBC repository interfaces.
-2024-02-14 18:25:52 [main] INFO  : Multiple Spring Data modules found, entering strict repository configuration mode
-2024-02-14 18:25:52 [main] INFO  : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2024-02-14 18:25:52 [main] INFO  : Finished Spring Data repository scanning in 25 ms. Found 3 JPA repository interfaces.
-2024-02-14 18:25:53 [main] INFO  : Tomcat initialized with port 8080 (http)
-2024-02-14 18:25:53 [main] INFO  : Initializing ProtocolHandler ["http-nio-8080"]
-2024-02-14 18:25:53 [main] INFO  : Starting service [Tomcat]
-2024-02-14 18:25:53 [main] INFO  : Starting Servlet engine: [Apache Tomcat/10.1.18]
-2024-02-14 18:25:53 [main] INFO  : Initializing Spring embedded WebApplicationContext
-2024-02-14 18:25:53 [main] INFO  : Root WebApplicationContext: initialization completed in 2002 ms
-2024-02-14 18:25:53 [main] INFO  : HikariPool-1 - Starting...
-2024-02-14 18:25:54 [main] INFO  : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:testdb user=SA
-2024-02-14 18:25:54 [main] INFO  : HikariPool-1 - Start completed.
-2024-02-14 18:25:54 [main] INFO  : H2 console available at '/h2-ui'. Database available at 'jdbc:h2:mem:testdb'
-2024-02-14 18:25:54 [main] INFO  : HHH000204: Processing PersistenceUnitInfo [name: default]
-2024-02-14 18:25:54 [main] INFO  : HHH000412: Hibernate ORM core version 6.4.1.Final
-2024-02-14 18:25:54 [main] INFO  : HHH000026: Second-level cache disabled
-2024-02-14 18:25:54 [main] INFO  : No LoadTimeWeaver setup: ignoring JPA class transformer
-2024-02-14 18:25:54 [main] WARN  : HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
-2024-02-14 18:25:55 [main] INFO  : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-2024-02-14 18:25:55 [main] INFO  : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2024-02-14 18:25:56 [main] WARN  : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
-2024-02-14 18:25:56 [main] INFO  : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@1e3c4c12, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@7a8e35d1, org.springframework.security.web.context.SecurityContextHolderFilter@28f7cca4, org.springframework.web.filter.CorsFilter@e74300b, org.springframework.security.web.authentication.logout.LogoutFilter@41fe0d98, org.springframework.security.web.authentication.www.BasicAuthenticationFilter@27ea7c8f, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@2d541e01, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@4c897417, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@1aade3c, org.springframework.security.web.access.ExceptionTranslationFilter@2fccfcdb, org.springframework.security.web.access.intercept.AuthorizationFilter@951053f]
-2024-02-14 18:25:57 [main] INFO  : Starting ProtocolHandler ["http-nio-8080"]
-2024-02-14 18:25:57 [main] INFO  : Tomcat started on port 8080 (http) with context path ''
-2024-02-14 18:25:57 [main] INFO  : Started DigitalWalletApplication in 6.087 seconds (process running for 7.024)
-2024-02-14 18:26:01 [http-nio-8080-exec-2] INFO  : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2024-02-14 18:26:01 [http-nio-8080-exec-2] INFO  : Initializing Servlet 'dispatcherServlet'
-2024-02-14 18:26:01 [http-nio-8080-exec-2] INFO  : Completed initialization in 2 ms
-2024-02-14 18:26:01 [http-nio-8080-exec-2] DEBUG : Securing POST /digitalWalletSystem/v1/user/createWallet
-2024-02-14 18:26:02 [http-nio-8080-exec-2] DEBUG : Authenticated user
-2024-02-14 18:26:02 [http-nio-8080-exec-2] DEBUG : Set SecurityContextHolder to UsernamePasswordAuthenticationToken [Principal=org.springframework.security.core.userdetails.User [Username=Venu7377, Password=[PROTECTED], Enabled=true, AccountNonExpired=true, CredentialsNonExpired=true, AccountNonLocked=true, Granted Authorities=[ROLE_User]], Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=0:0:0:0:0:0:0:1, SessionId=null], Granted Authorities=[ROLE_User]]
-2024-02-14 18:26:02 [http-nio-8080-exec-2] DEBUG : Secured POST /digitalWalletSystem/v1/user/createWallet
-2024-02-14 18:26:02 [http-nio-8080-exec-2] INFO  : Wallet created successfully for user: 1
-2024-02-14 18:26:17 [http-nio-8080-exec-3] DEBUG : Securing POST /digitalWalletSystem/v1/user/loadMoney
-2024-02-14 18:26:18 [http-nio-8080-exec-3] DEBUG : Authenticated user
-2024-02-14 18:26:18 [http-nio-8080-exec-3] DEBUG : Set SecurityContextHolder to UsernamePasswordAuthenticationToken [Principal=org.springframework.security.core.userdetails.User [Username=Venu7377, Password=[PROTECTED], Enabled=true, AccountNonExpired=true, CredentialsNonExpired=true, AccountNonLocked=true, Granted Authorities=[ROLE_User]], Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=0:0:0:0:0:0:0:1, SessionId=null], Granted Authorities=[ROLE_User]]
-2024-02-14 18:26:18 [http-nio-8080-exec-3] DEBUG : Secured POST /digitalWalletSystem/v1/user/loadMoney
+2024-02-14 23:55:29 [background-preinit] INFO  : HV000001: Hibernate Validator 8.0.1.Final
+2024-02-14 23:55:29 [main] INFO  : Starting DigitalWalletApplication using Java 21.0.1 with PID 11288 (C:\Users\HP\IdeaProjects\Digital_Wallet_System\target\classes started by HP in C:\Users\HP\IdeaProjects\Digital_Wallet_System)
+2024-02-14 23:55:29 [main] INFO  : No active profile set, falling back to 1 default profile: "default"
+2024-02-14 23:55:32 [main] INFO  : Multiple Spring Data modules found, entering strict repository configuration mode
+2024-02-14 23:55:32 [main] INFO  : Bootstrapping Spring Data JDBC repositories in DEFAULT mode.
+2024-02-14 23:55:32 [main] INFO  : Spring Data JDBC - Could not safely identify store assignment for repository candidate interface com.project.DigitalWallet.repo.PasswordRepository; If you want this repository to be a JDBC repository, consider annotating your entities with one of these annotations: org.springframework.data.relational.core.mapping.Table.
+2024-02-14 23:55:32 [main] INFO  : Spring Data JDBC - Could not safely identify store assignment for repository candidate interface com.project.DigitalWallet.repo.transactionRepository; If you want this repository to be a JDBC repository, consider annotating your entities with one of these annotations: org.springframework.data.relational.core.mapping.Table.
+2024-02-14 23:55:32 [main] INFO  : Spring Data JDBC - Could not safely identify store assignment for repository candidate interface com.project.DigitalWallet.repo.walletRepository; If you want this repository to be a JDBC repository, consider annotating your entities with one of these annotations: org.springframework.data.relational.core.mapping.Table.
+2024-02-14 23:55:32 [main] INFO  : Finished Spring Data repository scanning in 95 ms. Found 0 JDBC repository interfaces.
+2024-02-14 23:55:32 [main] INFO  : Multiple Spring Data modules found, entering strict repository configuration mode
+2024-02-14 23:55:32 [main] INFO  : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2024-02-14 23:55:32 [main] INFO  : Finished Spring Data repository scanning in 80 ms. Found 3 JPA repository interfaces.
+2024-02-14 23:55:34 [main] INFO  : Tomcat initialized with port 8080 (http)
+2024-02-14 23:55:34 [main] INFO  : Initializing ProtocolHandler ["http-nio-8080"]
+2024-02-14 23:55:34 [main] INFO  : Starting service [Tomcat]
+2024-02-14 23:55:34 [main] INFO  : Starting Servlet engine: [Apache Tomcat/10.1.18]
+2024-02-14 23:55:34 [main] INFO  : Initializing Spring embedded WebApplicationContext
+2024-02-14 23:55:34 [main] INFO  : Root WebApplicationContext: initialization completed in 4673 ms
+2024-02-14 23:55:34 [main] INFO  : HikariPool-1 - Starting...
+2024-02-14 23:55:35 [main] INFO  : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:testdb user=SA
+2024-02-14 23:55:35 [main] INFO  : HikariPool-1 - Start completed.
+2024-02-14 23:55:35 [main] INFO  : H2 console available at '/h2-ui'. Database available at 'jdbc:h2:mem:testdb'
+2024-02-14 23:55:35 [main] INFO  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2024-02-14 23:55:35 [main] INFO  : HHH000412: Hibernate ORM core version 6.4.1.Final
+2024-02-14 23:55:35 [main] INFO  : HHH000026: Second-level cache disabled
+2024-02-14 23:55:36 [main] INFO  : No LoadTimeWeaver setup: ignoring JPA class transformer
+2024-02-14 23:55:36 [main] WARN  : HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2024-02-14 23:55:38 [main] INFO  : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2024-02-14 23:55:39 [main] INFO  : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2024-02-14 23:55:40 [main] WARN  : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2024-02-14 23:55:41 [main] INFO  : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@20c55658, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@951053f, org.springframework.security.web.context.SecurityContextHolderFilter@7d6ccad7, org.springframework.web.filter.CorsFilter@e196238, org.springframework.security.web.authentication.logout.LogoutFilter@3a70acd5, org.springframework.security.web.authentication.www.BasicAuthenticationFilter@1f031994, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@481b8d53, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@6e8426aa, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@6f45be6f, org.springframework.security.web.access.ExceptionTranslationFilter@13446044, org.springframework.security.web.access.intercept.AuthorizationFilter@32c114d9]
+2024-02-14 23:55:42 [main] INFO  : Starting ProtocolHandler ["http-nio-8080"]
+2024-02-14 23:55:42 [main] INFO  : Tomcat started on port 8080 (http) with context path ''
+2024-02-14 23:55:42 [main] INFO  : Started DigitalWalletApplication in 13.98 seconds (process running for 16.704)
+2024-02-14 23:55:44 [http-nio-8080-exec-2] INFO  : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2024-02-14 23:55:44 [http-nio-8080-exec-2] INFO  : Initializing Servlet 'dispatcherServlet'
+2024-02-14 23:55:44 [http-nio-8080-exec-2] INFO  : Completed initialization in 5 ms
+2024-02-14 23:55:44 [http-nio-8080-exec-2] DEBUG : Securing POST /digitalWalletSystem/v1/user/createWallet
+2024-02-14 23:55:45 [http-nio-8080-exec-2] DEBUG : Authenticated user
+2024-02-14 23:55:45 [http-nio-8080-exec-2] DEBUG : Set SecurityContextHolder to UsernamePasswordAuthenticationToken [Principal=org.springframework.security.core.userdetails.User [Username=Venu7377, Password=[PROTECTED], Enabled=true, AccountNonExpired=true, CredentialsNonExpired=true, AccountNonLocked=true, Granted Authorities=[ROLE_User]], Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=0:0:0:0:0:0:0:1, SessionId=null], Granted Authorities=[ROLE_User]]
+2024-02-14 23:55:45 [http-nio-8080-exec-2] DEBUG : Secured POST /digitalWalletSystem/v1/user/createWallet
+2024-02-14 23:55:46 [http-nio-8080-exec-2] INFO  : Wallet created successfully for user: 1
+2024-02-14 23:55:52 [http-nio-8080-exec-3] DEBUG : Securing POST /digitalWalletSystem/v1/user/createWallet
+2024-02-14 23:55:52 [http-nio-8080-exec-3] DEBUG : Authenticated user
+2024-02-14 23:55:52 [http-nio-8080-exec-3] DEBUG : Set SecurityContextHolder to UsernamePasswordAuthenticationToken [Principal=org.springframework.security.core.userdetails.User [Username=Venu7377, Password=[PROTECTED], Enabled=true, AccountNonExpired=true, CredentialsNonExpired=true, AccountNonLocked=true, Granted Authorities=[ROLE_User]], Credentials=[PROTECTED], Authenticated=true, Details=WebAuthenticationDetails [RemoteIpAddress=0:0:0:0:0:0:0:1, SessionId=null], Granted Authorities=[ROLE_User]]
+2024-02-14 23:55:52 [http-nio-8080-exec-3] DEBUG : Secured POST /digitalWalletSystem/v1/user/createWallet
+2024-02-14 23:55:52 [http-nio-8080-exec-3] WARN  : SQL Error: 23505, SQLState: 23505
+2024-02-14 23:55:52 [http-nio-8080-exec-3] ERROR : Unique index or primary key violation: "PUBLIC.UK_N14MNJFH0J5PSW8OMLEGP1D68_INDEX_4 ON PUBLIC.USERS(CONTACT_NUMBER NULLS FIRST) VALUES ( /* 1 */ '9782789457' )"; SQL statement:
+insert into users (amount,contact_number,name,user_id) values (?,?,?,?) [23505-224]
+2024-02-14 23:55:53 [http-nio-8080-exec-3] ERROR : Error creating wallet for user: 2
+2024-02-14 23:56:13 [SpringApplicationShutdownHook] INFO  : Closing JPA EntityManagerFactory for persistence unit 'default'
+2024-02-14 23:56:13 [SpringApplicationShutdownHook] INFO  : HikariPool-1 - Shutdown initiated...
+2024-02-14 23:56:13 [SpringApplicationShutdownHook] INFO  : HikariPool-1 - Shutdown completed.
