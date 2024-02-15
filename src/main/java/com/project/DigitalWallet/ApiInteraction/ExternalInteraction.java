@@ -1,57 +1,71 @@
 package com.project.DigitalWallet.ApiInteraction;
-import com.project.DigitalWallet.PropertyReader;
-import org.apache.http.HttpResponse;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project.DigitalWallet.ApiResponse;
+import com.project.DigitalWallet.DTO.ExternalApiResponseDTO;
+import com.project.DigitalWallet.PropertyReader;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 @Service
 public class ExternalInteraction {
 
     @Autowired
-    PropertyReader propertyReader;
-    public String makeApiCall() throws IOException {
+    private PropertyReader propertyReader;
 
+    public ResponseEntity< ApiResponse<List<Map<String,Object>>>> makeApiCall() throws JsonProcessingException {
         String username = propertyReader.getProperty("external.username");
         String password = propertyReader.getProperty("external.password");
         String apiUrl = propertyReader.getProperty("apiUrl");
-            CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-            credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(username, password));
 
-            HttpClient httpClient = HttpClientBuilder.create()
-                    .setDefaultCredentialsProvider(credentialsProvider)
-                    .build();
-            HttpGet httpGet = new HttpGet(apiUrl);
+        WebClient webClient = WebClient.builder()
+                .baseUrl(apiUrl)
+                .defaultHeader("Authorization", "Basic " + getBasicAuth(username, password))
+                .build();
 
 
-            HttpResponse response = httpClient.execute(httpGet);
-            int statusCode = response.getStatusLine().getStatusCode();
+        String responseBody = webClient.get()
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<ExternalApiResponseDTO> externalApiResponseDTOList = objectMapper.readValue(responseBody, new TypeReference<>() {
+        });
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (ExternalApiResponseDTO responseDTO : externalApiResponseDTOList) {
+            Map<String, Object> userMap = new HashMap<>();
+            userMap.put("walletId", responseDTO.getWalletId());
+            userMap.put("username", responseDTO.getUsername());
+            result.add(userMap);
+        }
 
-            if (statusCode == 200) {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-                String line;
-                StringBuilder responseContent = new StringBuilder();
 
-                while ((line = reader.readLine()) != null) {
-                    responseContent.append(line);
-                }
-                reader.close();
+        ApiResponse<List<Map<String,Object>>> apiResponse = new ApiResponse<>("01", "Success", result);
+        return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
 
-                return "API Response: " + responseContent.toString();
-            } else {
-                return "API request failed. Response Code: " + statusCode;
-            }
     }
 
+    private String getBasicAuth(String username, String password) {
+        String credentials = username + ":" + password;
+        byte[] base64Credentials = Base64.getEncoder().encode(credentials.getBytes());
+        return new String(base64Credentials, StandardCharsets.UTF_8);
+    }
 }
+
+
+
+
+
+
+
+
+
 

@@ -21,7 +21,6 @@ import com.project.DigitalWallet.repo.walletRepository2;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -42,8 +41,6 @@ public  class walletServices implements walletRepository2 {
     @Autowired
     transactionRepository t_rep;
 
-
-
     @Autowired
     PropertyReader propertyReader;
     @Autowired
@@ -55,7 +52,7 @@ public  class walletServices implements walletRepository2 {
 
     @Override
     public ResponseEntity<ApiResponse<WalletCreationResponse>> createWallet(Users u) {
-        try {
+
             Users user = wallet.save(u);
             String generatedPassword = passwordGenerator.generateUniquePassword();
             PasswordEntity passwordEntity = new PasswordEntity();
@@ -66,10 +63,7 @@ public  class walletServices implements walletRepository2 {
             logger.info("Wallet created successfully for user: {}", u.getUserId());
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(new ApiResponse<>(ResponseCode.SUCCESS.getCode(), ResponseCode.SUCCESS.getDescription(), response));
-        } catch (DataIntegrityViolationException e) {
-            logger.error("Error creating wallet for user: {}", u.getUserId());
-            throw e;
-        }
+
     }
 
 
@@ -101,17 +95,17 @@ public  class walletServices implements walletRepository2 {
                 throw new InvalidAmountException("Amount to be loaded should be between " + Double.parseDouble(min_money) + " and " + Double.parseDouble(max_money));
             } else {
                 saveTransaction(u.getUserId(), "Loaded", u.getAmount(), getDateTime());
+                double currentAmount = currentUserData.getAmount();
+                currentUserData.setAmount(currentAmount + u.getAmount());
+                Users updatedUsersData = wallet.save(currentUserData);
+                UserDTO dto = new UserDTO(updatedUsersData);
+                logger.info("Money added successfully to user's wallet: {}", u.getUserId());
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(new ApiResponse<>(ResponseCode.SUCCESS.getCode(), ResponseCode.SUCCESS.getDescription(), dto));
             }
-            double currentAmount = currentUserData.getAmount();
-            currentUserData.setAmount(currentAmount + u.getAmount());
-            Users updatedUsersData = wallet.save(currentUserData);
-            UserDTO dto = new UserDTO(updatedUsersData);
-            logger.info("Money added successfully to user's wallet: {}", u.getUserId());
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(new ApiResponse<>(ResponseCode.SUCCESS.getCode(), ResponseCode.SUCCESS.getDescription(), dto));
+        }else {
+            throw new InvalidPasswordException(u.getUserId());
         }
-        logger.warn("Invalid password for addMoney operation for user: {}", u.getUserId());
-        throw new InvalidPasswordException();
     }
 
 
@@ -151,16 +145,13 @@ public  class walletServices implements walletRepository2 {
                 throw new InvalidAmountException("Maximum Amount that can be transferred is" + Double.parseDouble(max_transfer_money));
             }
         }
-        logger.warn("Invalid password for transferMoney operation for user: {}", transferRequest.getFromUserId());
-        throw new InvalidPasswordException();
+        throw new InvalidPasswordException(transferRequest.getFromUserId());
     }
-
 
 
 
     @Override
     public ResponseEntity<ApiResponse<String>> checkAmount(Long userId, String password) {
-        try {
             Users currentUserData = wallet.findById(userId)
                     .orElseThrow(() -> new UserNotFoundException(userId));
             if (passwordEncoder.matches(password, getPasswordByUserId(userId))) {
@@ -169,13 +160,7 @@ public  class walletServices implements walletRepository2 {
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(new ApiResponse<>(ResponseCode.SUCCESS.getCode(), ResponseCode.SUCCESS.getDescription(), "Your Wallet Amount : " + amount));
             }
-            logger.warn("Invalid password for checkAmount operation for user: {}", userId);
-            throw new InvalidPasswordException();
-        }
-        catch (UserNotFoundException e) {
-                logger.error("No User Found with UserID: {}", userId);
-                throw e;
-        }
+            throw new InvalidPasswordException(userId);
     }
 
     @Override
@@ -188,15 +173,14 @@ public  class walletServices implements walletRepository2 {
                 logger.info("Retrieved transaction history for user: {}", userId);
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(new ApiResponse<>(ResponseCode.SUCCESS.getCode(), ResponseCode.SUCCESS.getDescription(), history));
+            }else {
+                throw new InvalidPasswordException(userId);
             }
-            logger.warn("Invalid password for getHistory operation for user: {}", userId);
-            throw new InvalidPasswordException();
 
     }
 
     @Override
     public ResponseEntity<ApiResponse<String>> removeUser(Long userId, String password) {
-
             Users currentUserData = wallet.findById(userId)
                     .orElseThrow(() -> new UserNotFoundException(userId));
             if (passwordEncoder.matches(password, getPasswordByUserId(userId))) {
@@ -205,9 +189,9 @@ public  class walletServices implements walletRepository2 {
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(new ApiResponse<>(ResponseCode.SUCCESS.getCode(), ResponseCode.SUCCESS.getDescription(), "Wallet of user with Users Id: " + userId + " is Deleted"));
             }
-            logger.warn("Invalid password for removeUser operation for user: {}", userId);
-            throw new InvalidPasswordException();
-
+            else {
+                throw new InvalidPasswordException(userId);
+            }
     }
 
     @Override
@@ -220,17 +204,15 @@ public  class walletServices implements walletRepository2 {
                 logger.info("Filtered transactions for user: {}", userId);
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(new ApiResponse<>(ResponseCode.SUCCESS.getCode(), ResponseCode.SUCCESS.getDescription(), filteredTransactions));
+            }else {
+                throw new InvalidPasswordException(userId);
             }
-            logger.warn("Invalid password for filterTransactions operation for user: {}", userId);
-            throw new InvalidPasswordException();
 
     }
 
     public ResponseEntity<ApiResponse<List<UserDtoForAdmin>>> getAllUsers() {
-
             List<Users> allUsers = wallet.findAll();
             List<UserDtoForAdmin> userInfoList = new ArrayList<>();
-
             for (Users user : allUsers) {
                 UserDtoForAdmin userInfo = new UserDtoForAdmin(user.getUserId(), user.getName());
                 userInfoList.add(userInfo);

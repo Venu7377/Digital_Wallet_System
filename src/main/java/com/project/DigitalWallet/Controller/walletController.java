@@ -1,5 +1,6 @@
 package com.project.DigitalWallet.Controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.project.DigitalWallet.ApiInteraction.ExternalInteraction;
 import com.project.DigitalWallet.ApiResponse;
 import com.project.DigitalWallet.DTO.UserDTO;
@@ -15,8 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @RequestMapping("digitalWalletSystem/v1")
 @SecurityRequirement(name = "basicAuth")
@@ -24,11 +25,8 @@ import java.util.List;
 public class walletController {
     @Autowired
     walletServices walletService;
-    private final ExternalInteraction externalInteraction;
-
-    public walletController(ExternalInteraction externalInteraction) {
-        this.externalInteraction = externalInteraction;
-    }
+    @Autowired
+    ExternalInteraction externalInteraction;
 
     @PostMapping("/user/createWallet")
    public ResponseEntity<ApiResponse<WalletCreationResponse>> addUser(@RequestBody @Valid Users u) {
@@ -84,13 +82,8 @@ public ResponseEntity<ApiResponse<UserDTO>> addMoney(@RequestBody Users u, @Requ
 
 
     @GetMapping("/fetchExternalWallet")
-    public String makeApiCall() {
-        try {
-            return externalInteraction.makeApiCall();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return "Error making API call";
-        }
+    public ResponseEntity< ApiResponse<List<Map<String,Object>>>> makeApiCall() throws JsonProcessingException {
+        return externalInteraction.makeApiCall();
     }
 }
 
