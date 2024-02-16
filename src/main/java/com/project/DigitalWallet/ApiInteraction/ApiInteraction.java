@@ -1,56 +1,42 @@
 package com.project.DigitalWallet.ApiInteraction;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.impl.client.HttpClientBuilder;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.net.http.HttpResponse;
+import java.net.http.HttpClient;
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpRequest;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 public class ApiInteraction {
     public static void main(String[] args) {
+
+        String apiUrl = "http://localhost:8080/digitalWalletSystem/v1/admin/getAllUsers";
+        String username = "Admin123";
+        String password = "Admin@123";
         try {
-
-            String apiUrl = "http://localhost:8080/digitalWalletSystem/v1/user/fetchBalance?userId=1";
-            String username = "Venu7377";
-            String password = "Venu@7377";
-
-
-            CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-            credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(username, password));
-
-            HttpClient httpClient = HttpClientBuilder.create()
-                    .setDefaultCredentialsProvider(credentialsProvider)
-                    .build();
-
-            HttpGet request = new HttpGet(apiUrl);
-
-            HttpResponse response = httpClient.execute(request);
-
-            int statusCode = response.getStatusLine().getStatusCode();
-
-            if (statusCode == 200) {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-                String line;
-                StringBuilder responseContent = new StringBuilder();
-
-                while ((line = reader.readLine()) != null) {
-                    responseContent.append(line);
-                }
-
-                reader.close();
-
-                System.out.println("API Response: " + responseContent.toString());
-            } else {
-                System.out.println("API request failed. Response Code: " + statusCode);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
+            String response = sendGetRequest(apiUrl, username, password);
+            System.out.println(response);
+        } catch (IOException | InterruptedException e) {
+            System.out.println("Exception occurred: " + e.getMessage());
         }
     }
+    private static String sendGetRequest(String apiUrl, String username, String password) throws IOException, InterruptedException {
+                HttpClient httpClient = HttpClient.newBuilder().build();
+
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(apiUrl))
+                        .header("Authorization", "Basic " + getBasicAuth(username, password))
+                        .GET()
+                        .build();
+
+                HttpResponse<String> httpResponse = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+                return httpResponse.body();
+    }
+
+    private static String getBasicAuth(String username, String password) {
+        String credentials = username + ":" + password;
+        byte[] base64Credentials = Base64.getEncoder().encode(credentials.getBytes());
+        return new String(base64Credentials, StandardCharsets.UTF_8);
+    }
+
 }
