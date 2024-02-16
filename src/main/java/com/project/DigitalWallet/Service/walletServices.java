@@ -122,8 +122,10 @@ public  class walletServices implements walletRepository2 {
 
             double currentAmount1 = currentUsers1Data.getAmount();
             String max_transfer_money = propertyReader.getProperty("money.transfer.max");
+            String min_transfer_money = propertyReader.getProperty("money.transfer.min");
             if (transferRequest.getAmount() <= Double.parseDouble(max_transfer_money)) {
-                if (currentAmount1 >= transferRequest.getAmount()) {
+                if(transferRequest.getAmount()>0){
+                if(currentAmount1 >= transferRequest.getAmount()) {
                     double currentAmount2 = currentUsers2Data.getAmount();
                     currentUsers1Data.setAmount(currentAmount1 - transferRequest.getAmount());
                     currentUsers2Data.setAmount(currentAmount2 + transferRequest.getAmount());
@@ -136,16 +138,20 @@ public  class walletServices implements walletRepository2 {
 
                     return ResponseEntity.status(HttpStatus.OK)
                             .body(new ApiResponse<>(ResponseCode.SUCCESS.getCode(), ResponseCode.SUCCESS.getDescription(), dto));
-                } else {
+                }
+                else {
                     saveTransaction(transferRequest.getFromUserId(), "Failed", transferRequest.getAmount(), getDateTime());
-
                     throw new InvalidAmountException("Insufficient Amount for transfer");
                 }
-            } else {
+                } else {
+                    throw new InvalidAmountException("Minimum Amount that can be transferred is " + Double.parseDouble(min_transfer_money));
+                }
+            }
+            else {
                 throw new InvalidAmountException("Maximum Amount that can be transferred is" + Double.parseDouble(max_transfer_money));
             }
         }
-        throw new InvalidPasswordException(transferRequest.getFromUserId());
+         throw new InvalidPasswordException(transferRequest.getFromUserId());
     }
 
 
