@@ -10,7 +10,8 @@ public enum ResponseCode {
     INVALID_AMOUNT("04","Transaction Failed..Invalid Amount Entered"),
     TRANSACTION_SUCCESS("05","Transaction Successful"),
     CLOSED_CHANNEL_ERROR("06", "Closed channel error"),
-    WEB_CLIENT_ERROR("07","Web Client Response Error");
+    WEB_CLIENT_ERROR("07","Web Client Response Error"),
+    TRANSACTION_LIMIT("08","Transaction Limit Exceeded");
 
     private final String code;
     private final String description;

@@ -98,6 +98,18 @@ import java.util.List;
                         "WebClient response error occurred. Please try again."
                 ));
     }
+
+    @ExceptionHandler(TransactionLimitExceedException.class)
+    public ResponseEntity<ApiResponse<String>> handleTransactionLimitException(TransactionLimitExceedException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ApiResponse<>(
+                        ResponseCode.TRANSACTION_LIMIT.getCode(),
+                        ResponseCode.TRANSACTION_LIMIT.getDescription(),
+                        "Transaction Limit Exceeded. Please Try after 2 min."
+                ));
+    }
+
+
 }
 
 

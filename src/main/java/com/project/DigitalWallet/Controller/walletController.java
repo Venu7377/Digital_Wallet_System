@@ -53,18 +53,16 @@ public ResponseEntity<ApiResponse<UserDTO>> addMoney(@RequestBody Users u, @Requ
     }
 
 
-    @GetMapping("/user/fetchHistory")
-    public ResponseEntity<ApiResponse<List<Transaction>>> getHistory(@RequestParam Long userId, @RequestHeader("Password") String password){
-                return walletService.getHistory(userId,password);
+    @GetMapping("/user/transactions")
+    public ResponseEntity<ApiResponse<List<Transaction>>> getTransactions(
+            @RequestParam Long userId,
+            @RequestParam(required = false) String filterBy,
+            @RequestHeader("Password") String password,
+            @RequestParam int pageNumber,
+            @RequestParam int pageSize) {
+        return walletService.getTransactions(userId,password,pageNumber,pageSize,filterBy);
     }
 
-
-    @GetMapping("/user/transactions/filter")
-    public ResponseEntity<ApiResponse<List<Transaction>>> filterTransactions( @RequestParam Long userId, @RequestParam String transactionType,@RequestHeader("Password") String password)
-    {
-        return walletService.filterTransactions(userId,transactionType,password);
-
-    }
 
 
     @DeleteMapping("/user/removeUser")
