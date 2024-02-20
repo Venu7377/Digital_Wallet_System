@@ -15,6 +15,7 @@ public interface walletRepository2 {
     ResponseEntity<ApiResponse<UserDTO>> addMoney(Users u, String password);
     ResponseEntity<ApiResponse<UserDTO>> transferMoney(TransferRequest transferRequest,String password);
     ResponseEntity<ApiResponse<String>> checkAmount(Long userId,String password);
-    ResponseEntity<ApiResponse<List<Transaction>>> getTransactions(Long userId, String password,int pageNumber,int pageSize,String transactionType);
+    ResponseEntity<ApiResponse<List<Transaction>>> getHistory(Long userId, String password);
     ResponseEntity<ApiResponse<String>> removeUser(Long userId,String password);
+    ResponseEntity<ApiResponse<List<Transaction>>> filterTransactions(Long userId, String transactionType,String password);
 }

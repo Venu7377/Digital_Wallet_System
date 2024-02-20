@@ -6,35 +6,31 @@ import com.project.DigitalWallet.DTO.UserDtoForAdmin;
 import com.project.DigitalWallet.DTO.WalletCreationResponse;
 import com.project.DigitalWallet.ExceptionHandlers.InvalidAmountException;
 import com.project.DigitalWallet.ExceptionHandlers.InvalidPasswordException;
-import com.project.DigitalWallet.ExceptionHandlers.TransactionLimitExceedException;
 import com.project.DigitalWallet.ExceptionHandlers.UserNotFoundException;
 import com.project.DigitalWallet.Model.PasswordEntity;
 import com.project.DigitalWallet.Model.Transaction;
-import com.project.DigitalWallet.Model.TransactionLimit;
 import com.project.DigitalWallet.Model.Users;
 import com.project.DigitalWallet.PasswordGenerator.PasswordGenerator;
 import com.project.DigitalWallet.PropertyReader;
 import com.project.DigitalWallet.ResponseCode;
 import com.project.DigitalWallet.TransferRequest;
-import com.project.DigitalWallet.repo.*;
+import com.project.DigitalWallet.repo.PasswordRepository;
+import com.project.DigitalWallet.repo.transactionRepository;
+import com.project.DigitalWallet.repo.walletRepository;
+import com.project.DigitalWallet.repo.walletRepository2;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 
@@ -46,13 +42,11 @@ public  class walletServices implements walletRepository2 {
     transactionRepository t_rep;
 
     @Autowired
-     PropertyReader propertyReader;
+    PropertyReader propertyReader;
     @Autowired
     PasswordGenerator passwordGenerator;
     @Autowired
     PasswordRepository passwordRepository;
-    @Autowired
-    static transactionLimitRepository t;
     private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     private static final Logger logger = LogManager.getLogger(walletServices.class);
 
@@ -125,26 +119,25 @@ public  class walletServices implements walletRepository2 {
                 .orElseThrow(() -> new UserNotFoundException(transferRequest.getToUserId()));
 
         if (passwordEncoder.matches(password, getPasswordByUserId(transferRequest.getFromUserId()))) {
+
             double currentAmount1 = currentUsers1Data.getAmount();
             String max_transfer_money = propertyReader.getProperty("money.transfer.max");
             String min_transfer_money = propertyReader.getProperty("money.transfer.min");
             if (transferRequest.getAmount() <= Double.parseDouble(max_transfer_money)) {
                 if(transferRequest.getAmount()>0){
                 if(currentAmount1 >= transferRequest.getAmount()) {
-                    if(isValidTransaction(transferRequest.getFromUserId(),transferRequest.getAmount())) {
-                        double currentAmount2 = currentUsers2Data.getAmount();
-                        currentUsers1Data.setAmount(currentAmount1 - transferRequest.getAmount());
-                        currentUsers2Data.setAmount(currentAmount2 + transferRequest.getAmount());
-                        Users updatedUsers1Data = wallet.save(currentUsers1Data);
-                        UserDTO dto = new UserDTO(updatedUsers1Data);
-                        saveTransaction(transferRequest.getFromUserId(), "Debited", transferRequest.getAmount(), getDateTime());
-                        saveTransaction(transferRequest.getToUserId(), "Credited", transferRequest.getAmount(), getDateTime());
-                        logger.info("Money transferred successfully from user {} to user {}: {}",
-                                transferRequest.getFromUserId(), transferRequest.getToUserId(), transferRequest.getAmount());
+                    double currentAmount2 = currentUsers2Data.getAmount();
+                    currentUsers1Data.setAmount(currentAmount1 - transferRequest.getAmount());
+                    currentUsers2Data.setAmount(currentAmount2 + transferRequest.getAmount());
+                    Users updatedUsers1Data = wallet.save(currentUsers1Data);
+                    UserDTO dto = new UserDTO(updatedUsers1Data);
+                    saveTransaction(transferRequest.getFromUserId(), "Debited", transferRequest.getAmount(), getDateTime());
+                    saveTransaction(transferRequest.getToUserId(), "Credited", transferRequest.getAmount(), getDateTime());
+                    logger.info("Money transferred successfully from user {} to user {}: {}",
+                            transferRequest.getFromUserId(), transferRequest.getToUserId(), transferRequest.getAmount());
 
-                        return ResponseEntity.status(HttpStatus.OK)
-                                .body(new ApiResponse<>(ResponseCode.SUCCESS.getCode(), ResponseCode.SUCCESS.getDescription(), dto));
-                    } throw new TransactionLimitExceedException();
+                    return ResponseEntity.status(HttpStatus.OK)
+                            .body(new ApiResponse<>(ResponseCode.SUCCESS.getCode(), ResponseCode.SUCCESS.getDescription(), dto));
                 }
                 else {
                     saveTransaction(transferRequest.getFromUserId(), "Failed", transferRequest.getAmount(), getDateTime());
@@ -176,36 +169,20 @@ public  class walletServices implements walletRepository2 {
             throw new InvalidPasswordException(userId);
     }
 
+    @Override
+    public ResponseEntity<ApiResponse<List<Transaction>>> getHistory(Long userId, String password) {
 
-@Override
-    public ResponseEntity<ApiResponse<List<Transaction>>> getTransactions(
-            Long userId, String password, int pageNumber, int pageSize,String transactionType) {
-        Users currentUserData = wallet.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
-        if (passwordEncoder.matches(password, getPasswordByUserId(userId))) {
-            List<Transaction> transactions;
-
-            if (Objects.equals(transactionType, "none") || transactionType.isEmpty()) {
-                transactions = getAllTransactions(userId, pageNumber, pageSize);
-            } else {
-                transactions = getFilteredTransactions(userId,transactionType,pageNumber,pageSize);
+            Users currentUserData = wallet.findById(userId)
+                    .orElseThrow(() -> new UserNotFoundException(userId));
+            if (passwordEncoder.matches(password, getPasswordByUserId(userId))) {
+                List<Transaction> history = t_rep.findByuserIdOrderByTimestampDesc(userId);
+                logger.info("Retrieved transaction history for user: {}", userId);
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(new ApiResponse<>(ResponseCode.SUCCESS.getCode(), ResponseCode.SUCCESS.getDescription(), history));
+            }else {
+                throw new InvalidPasswordException(userId);
             }
-            logger.info("Retrieved transactions for user: {}", userId);
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(new ApiResponse<>(ResponseCode.SUCCESS.getCode(), ResponseCode.SUCCESS.getDescription(), transactions));
-        } else {
-            throw new InvalidPasswordException(userId);
-        }
-    }
 
-    private List<Transaction> getAllTransactions(Long userId, int pageNumber, int pageSize) {
-        Pageable page = PageRequest.of(pageNumber, pageSize, Sort.by("timestamp").descending());
-        return t_rep.findByuserId(userId, page);
-    }
-
-    private List<Transaction> getFilteredTransactions(Long userId, String transactionType,int pageNumber,int pageSize) {
-        Pageable page = PageRequest.of(pageNumber, pageSize, Sort.by("timestamp").descending());
-        return t_rep.findByuserIdAndTransactionType(userId, transactionType,page);
     }
 
     @Override
@@ -223,7 +200,21 @@ public  class walletServices implements walletRepository2 {
             }
     }
 
+    @Override
+    public ResponseEntity<ApiResponse<List<Transaction>>> filterTransactions(Long userId, String transactionType, String password) {
 
+            Users currentUserData = wallet.findById(userId)
+                    .orElseThrow(() -> new UserNotFoundException(userId));
+            if (passwordEncoder.matches(password, getPasswordByUserId(userId))) {
+                List<Transaction> filteredTransactions = t_rep.findByuserIdAndTransactionTypeOrderByTimestampDesc(userId, transactionType);
+                logger.info("Filtered transactions for user: {}", userId);
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(new ApiResponse<>(ResponseCode.SUCCESS.getCode(), ResponseCode.SUCCESS.getDescription(), filteredTransactions));
+            }else {
+                throw new InvalidPasswordException(userId);
+            }
+
+    }
 
     public ResponseEntity<ApiResponse<List<UserDtoForAdmin>>> getAllUsers() {
             List<Users> allUsers = wallet.findAll();
@@ -248,34 +239,6 @@ public  class walletServices implements walletRepository2 {
             }
 
     }
-
-    private boolean isValidTransaction(Long userId,double amount){
-        double max_transaction_count = Double.parseDouble(propertyReader.getProperty("money.transaction.count"));
-        double max_transaction_amount = Double.parseDouble(propertyReader.getProperty("money.transaction.amount"));
-        long thresholdTime = Long.parseLong(propertyReader.getProperty("limit_reset_duration"));
-        TransactionLimit transactionLimit=t.findByuserId(userId);
-        if(transactionLimit.getTransactionCount()<max_transaction_count && transactionLimit.getTransactionCount()+amount<=max_transaction_amount){
-            transactionLimit.setTotalAmount(transactionLimit.getTotalAmount()+amount);
-            transactionLimit.setTransactionCount(transactionLimit.getTransactionCount()+1);
-            LocalDateTime currentTime = LocalDateTime.parse(getDateTime());
-            LocalDateTime lastValidTransactionTimeStamp= LocalDateTime.parse(transactionLimit.getTimestamp());
-            Duration duration = Duration.between(lastValidTransactionTimeStamp, currentTime);
-            if (duration.toMinutes() > thresholdTime) {
-                resetTransactionLimits(transactionLimit);
-            }
-            return true;
-        }
-      return false;
-    }
-
-    private static void resetTransactionLimits(TransactionLimit transactionLimit) {
-        transactionLimit.setTransactionCount(0);
-        transactionLimit.setTotalAmount(0);
-        transactionLimit.setTimestamp(getDateTime());
-        t.save(transactionLimit);
-    }
-
-
 }
 
 
